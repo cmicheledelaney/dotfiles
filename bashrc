@@ -1,14 +1,10 @@
-#
-# ~/.bashrc
-#
-
-# If not running interactively, don't do anything
-[[ $- != *i* ]] && return
-
 export EDITOR=vim
 export VISUAL=vim
-alias ls='ls --color=auto'
-PS1='[\u@\h \W]\$ '
-alias gcc='gcc -g -Wall -Wextra -Werror'
-alias vsc='/usr/bin/code'
 
+alias gitc='git commit -m "$(curl http://whatthecommit.com/index.txt)"'
+alias vsc='/Applications/Visual\ Studio\ Code.app/Contents/MacOS/Electron'
+alias gcc='gcc -g -Wall -Wextra -Werror'
+alias filechecker='sh ~/42FileChecker/42FileChecker.sh'
+alias python='python3'
+source ~/my_prompt/.my_prompt
+alias ls='ls --color=auto'
