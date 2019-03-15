@@ -53,6 +53,7 @@ alias vsc='/Applications/Visual\ Studio\ Code.app/Contents/MacOS/Electron'
 alias gcc='gcc -Wall -Wextra -Werror'
 alias filechecker='sh ~/42FileChecker/42FileChecker.sh'
 alias python='python3'
+alias ls='ls --color'
 alias cat='rainbowcat'
 alias vsc='/usr/bin/code'
 
