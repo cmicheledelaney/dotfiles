@@ -6,7 +6,7 @@
 [[ $- != *i* ]] && return
 
 # SOURCE
-source ~/my_prompt/.my_prompt
+source ~/.bash_prompt
 
 # EXPORTS
 # add my bin directory to the path
