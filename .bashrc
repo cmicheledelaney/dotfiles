@@ -47,9 +47,6 @@ elif [[ "${machine}" == "Mac" ]]; then
 	# SOURCE {{{2
 	source ~/.bash_prompt
 	# }}}
-	# EVAL {{{2
-	eval $(gdircolors -b $HOME/.LS_COLORS)
- 	# }}}
 	# EXPORTS {{{2
 	# make homebrew brew-locks directory
 	mkdir -p /tmp/.$(whoami)-brew-locks
@@ -61,6 +58,9 @@ elif [[ "${machine}" == "Mac" ]]; then
 	export EDITOR=vim
 	export VISUAL=vim
 	# }}}
+	# EVAL {{{2
+	eval $(gdircolors -b $HOME/.LS_COLORS)
+ 	# }}}
 	# ALIASES {{{2
 	alias gitc='git commit -m "$(curl http://whatthecommit.com/index.txt)"'
 	alias vsc='/Applications/Visual\ Studio\ Code.app/Contents/MacOS/Electron'
@@ -68,8 +68,8 @@ elif [[ "${machine}" == "Mac" ]]; then
 	alias filechecker='sh ~/42FileChecker/42FileChecker.sh'
 	alias python='python3'
 	alias ls='gls --color=auto'
-	alias la='gls -a'
-	alias ll='gls -l'
+	alias la='ls -a'
+	alias ll='ls -l'
 	alias cat='rainbowcat'
  	# }}}
 fi
