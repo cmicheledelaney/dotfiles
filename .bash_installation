@@ -2,17 +2,64 @@
 # ~/.bash_installation
 #
 
-# checks if my_prompt exists, clones it if necessary and sets the prompt to my_prompt
-if [[ ! -d ~/my_prompt ]]; then
-  git clone https://github.com/cmicheledelaney/my_prompt
+
+# get machine (Linux/Mac/Windows/other) {{{1
+uname_output="$(uname -s)"
+case "${uname_output}" in
+	Linux*)			machine="Linux";;
+	Darwin*)		machine="Mac";;
+	CYGWIN*|MINGW*)	machine="Windows";;
+	*)				machine="UNKNOWN:${uname_output}"
+esac
+# }}}
+# configurations for Linux {{{1
+if [[ "${machine}" == "Linux" ]]; then
+  echo "hmm have to think avout what to install"
 fi
-
-
+# }}}
+# configurations for Mac {{{1
+elif [[ "${machine}" == "Mac" ]]; then
+  if ! command -v brew; then
+	mkdir $HOME/.brew && curl -fsSL https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C $HOME/.brew
+	mkdir -p /tmp/.$(whoami)-brew-locks
+	mkdir -p $HOME/.brew/var/homebrew
+	ln -s /tmp/.$(whoami)-brew-locks $HOME/.brew/var/homebrew/locks
+	export PATH="$HOME/.brew/bin:$PATH"
+	brew update && brew upgrade
+  fi
+  if ! command -v gls; then
+	brew install coreutils
+  fi
+  if ! command -v python3; then
+	brew install python3
+  fi
+  if ! command -v valgrind; then
+	brew install valgrind
+  fi
+  if ! command -v shellcheck; then
+	brew install shellcheck
+  fi
+fi
+# }}}
+# configurations for all machines {{{1
+# bash_prompt {{{2
+# checks if bash_prompt exists, curl it if necessary
+if [[ ! -d ~/.bash_prompt ]]; then
+  curl https://raw.githubusercontent.com/cmicheledelaney/my_prompt/master/.my_prompt > ~/.bash_prompt
+fi
+# }}}
+# pretty_ls {{{2
+if [[ ! -f ~/.LS_COLORS ]]; then
+  curl https://raw.githubusercontent.com/cmicheledelaney/pretty_ls/master/.LS_COLORS > .LS_COLORS
+fi
+# }}}
+# bin {{{2
 # check if my bin directory with my applications in it exists; if it doesn't, create one
 if [[ ! -d ~/bin ]]; then
   mkdir ~/bin
 fi
-
+# }}}
+# rainbowcat {{{2
 # checks if rainbowcat exists, clones it if necessary and moves the binary into the path
 if [[ ! -f ~/bin/rainbowcat ]]; then
   if [[ ! -d ~/rainbowcat ]]; then
@@ -25,12 +72,13 @@ if [[ ! -f ~/bin/rainbowcat ]]; then
 	  echo "rainbowcat directory already exists"
   fi
 fi
-
+# }}}
+# 42project {{{2
 # clones the 42project script if necessary and moves it into the bin
 if [[ ! -f ~/bin/42project ]]; then
   if curl https://raw.githubusercontent.com/cmicheledelaney/42project/master/42project > ~/bin/42project; then
     chmod +x ~/bin/42project
   fi
 fi
-
-
+# }}}
+# }}}
