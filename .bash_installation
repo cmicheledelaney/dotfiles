@@ -15,7 +15,6 @@ esac
 # configurations for Linux {{{1
 if [[ "${machine}" == "Linux" ]]; then
   echo "hmm have to think avout what to install"
-fi
 # }}}
 # configurations for Mac {{{1
 elif [[ "${machine}" == "Mac" ]]; then
