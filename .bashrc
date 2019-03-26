@@ -17,7 +17,7 @@ esac
 # configurations for Linux {{{1
 if [[ "${machine}" == "Linux" ]]; then
 	# SOURCE {{{2
-	source ~/.bash_prompt
+	source ~/.pretty_bash_prompt
 	# }}}
 	# EVAL {{{2
 	eval $(dircolors -b $HOME/.LS_COLORS)
@@ -45,7 +45,7 @@ if [[ "${machine}" == "Linux" ]]; then
 # configurations for Mac {{{1
 elif [[ "${machine}" == "Mac" ]]; then
 	# SOURCE {{{2
-	source ~/.bash_prompt
+	source ~/.pretty_bash_prompt
 	# }}}
 	# EXPORTS {{{2
 	# make homebrew brew-locks directory
