@@ -42,6 +42,13 @@ set softtabstop=4
 
 " auto-shift to tab stop
 set shiftround
+
+" when the file is a bash file tabs equal 2 spaces
+autocmd FileType sh setlocal tabstop=2 shiftwidth=2 softtabstop=2 expandtab
+
+" when the file is a python file tabs equal 4 spaces
+autocmd FileType python setlocal tabstop=4 shiftwidth=4 softtabstop=4 expandtab
+
 " 1}}}
 " Orientation {{{1
 " uses the folding at the '{' markers
