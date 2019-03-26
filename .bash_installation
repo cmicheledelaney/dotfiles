@@ -43,13 +43,13 @@ fi
 # configurations for all machines {{{1
 # bash_prompt {{{2
 # checks if bash_prompt exists, curl it if necessary
-if [[ ! -d ~/.bash_prompt ]]; then
-  curl https://raw.githubusercontent.com/cmicheledelaney/my_prompt/master/.my_prompt > ~/.bash_prompt
+if [[ ! -d ~/.pretty_bash_prompt ]]; then
+  curl https://raw.githubusercontent.com/cmicheledelaney/pretty-bash-prompt/master/.pretty_bash_prompt > ~/.pretty_bash_prompt
 fi
 # }}}
 # pretty_ls {{{2
 if [[ ! -f ~/.LS_COLORS ]]; then
-  curl https://raw.githubusercontent.com/cmicheledelaney/pretty_ls/master/.LS_COLORS > .LS_COLORS
+  curl https://raw.githubusercontent.com/cmicheledelaney/pretty-ls/master/.LS_COLORS > .LS_COLORS
 fi
 # }}}
 # bin {{{2
