@@ -1,0 +1,399 @@
+#!/usr/bin/env bash
+
+# setting colorscheme {{{1
+
+# If we support tput setaf
+if tput setaf 1 &> /dev/null; then
+  # Reset the shell from our `if` check
+  tput sgr0 &> /dev/null
+
+  # Save common color actions
+  bold="$(tput bold)"
+  reset="$(tput sgr0)"
+
+  # colorscheme yellow/red
+  if [[ $COLOR_SCHEME_BASH_PROMPT == "yellow" || $COLOR_SCHEME_BASH_PROMPT == "red" ]]; then
+    color1="$bold$(tput setaf 124)"
+    color2="$bold$(tput setaf 196)"
+    color3="$bold$(tput setaf 202)"
+    color4="$bold$(tput setaf 208)"
+    color5="$bold$(tput setaf 214)"
+    color6="$bold$(tput setaf 220)"
+    color7="$bold$(tput setaf 226)"
+    color8="$bold$(tput setaf 229)"
+    color9="$bold$(tput setaf 230)"
+  # colorscheme blue/beige (default)
+  else
+    color1="$bold$(tput setaf 23)"
+    color2="$bold$(tput setaf 30)"
+    color3="$bold$(tput setaf 37)"
+    color4="$bold$(tput setaf 73)"
+    color5="$bold$(tput setaf 66)"
+    color6="$bold$(tput setaf 102)"
+    color7="$bold$(tput setaf 138)"
+    color8="$bold$(tput setaf 174)"
+    color9="$bold$(tput setaf 210)"
+  fi
+else
+# Otherwise, use ANSI escape sequences for coloring
+# still need to set the one for a not 256 color based set
+  reset='\e[0m'
+  if [[ $COLOR_SCHEME_BASH_PROMPT == "yellow" || $COLOR_SCHEME_BASH_PROMPT == "red" ]]; then
+    # colorscheme red/yellow
+    color1='\033[01;38;5;124m'
+    color2='\033[01;38;5;196m'
+    color3='\033[01;38;5;202m'
+    color4='\033[01;38;5;208m'
+    color5='\033[01;38;5;214m'
+    color6='\033[01;38;5;220m'
+    color7='\033[01;38;5;226m'
+    color8='\033[01;38;5;229m'
+    color7='\033[01;38;5;230m'
+  else
+    # colorscheme blue/beige
+    color1='\033[01;38;5;23m'
+    color2='\033[01;38;5;30m'
+    color3='\033[01;38;5;37m'
+    color4='\033[01;38;5;73m'
+    color5='\033[01;38;5;66m'
+    color6='\033[01;38;5;102m'
+    color7='\033[01;38;5;138m'
+    color8='\033[01;38;5;174m'
+    color9='\033[01;38;5;210m'
+  fi
+fi
+
+if [[ $COLOR_SCHEME_BASH_PROMPT == "red" || $COLOR_SCHEME_BASH_PROMPT == "blue" ]]; then
+  colors=(
+    "$color9"
+    "$color8"
+    "$color7"
+    "$color6"
+    "$color5"
+    "$color4"
+    "$color3"
+    "$color2"
+    "$color1"
+    )
+else
+  colors=(
+    "$color1"
+    "$color2"
+    "$color3"
+    "$color4"
+    "$color5"
+    "$color6"
+    "$color7"
+    "$color8"
+    "$color9"
+    )
+fi
+
+# Setting the color of the directory
+function get_dir_color() {
+  if [[ -z "$DIR_COLOR" ]]; then
+    printf "\x01${color_array[$len_name]}\x02"
+  else
+    printf "\x01${colors[$DIR_COLOR]}\x02"
+  fi
+}
+
+# Setting the branch color
+function get_branch_color() {
+  if [[ -z "$BRANCH_COLOR" ]]; then
+    printf "\x01${color_array[$len_name]}\x02"
+  else
+    printf "\x01${colors[$BRANCH_COLOR]}\x02"
+  fi
+}
+
+# Setting the text color
+function get_text_color() {
+  if [[ -z "$TEXT_COLOR" ]]; then
+    printf "\x01${reset}\x02"
+  else
+    printf "\x01${colors[$TEXT_COLOR]}\x02"
+  fi
+}
+
+# 1}}}
+# set symbols {{{1
+function set_symbol() {
+  # When as root, use !! as symbol
+  if [[ "$UID" == 0 ]]; then
+    symbol="!!"
+  # Define the default prompt terminator character '$'
+  else
+    if [[ -z "$PRETTY_PROMPT_SYMBOL" ]]; then
+      symbol="\$"
+    else
+      symbol="$PRETTY_PROMPT_SYMBOL"
+    fi
+  fi
+  print_colored $symbol
+}
+
+# Set up git symbols
+synced=""
+dirty_synced="*"
+unpushed="△"
+dirty_unpushed="▲"
+unpulled="▽"
+dirty_unpulled="▼"
+unpushed_unpulled="⬡"
+dirty_unpushed_unpulled="⬢"
+
+# 1}}}
+# Get information (username, battery stat, hostname) {{{1
+# If you want your username to depend on the ENV variable, use this:
+# Otherwise, use this:
+user="[[$USER]]"
+# user="[[$(whoami)]]"
+
+# Prints the hostname if the variable is set
+function get_hostname() {
+  if [[ $PRETTY_PROMPT_HOSTNAME == 'on' ]]; then
+    hostname=$(hostname)
+    printf "%s" "@"
+    if [[ -n $PRETTY_PROMPT_HOSTNAME_COLOR ]]; then
+      printf "%s" "${colors[$PRETTY_PROMPT_HOSTNAME_COLOR]}"
+    fi
+    printf "%s" " $hostname  "
+  fi
+}
+
+
+# Runs acpi to get the battery status and it.
+# Depending on how much charge is left, the color changes.
+function get_battery_stat() {
+  # If user wants to display the battery status set it
+  if [[ $BATTERY_STATUS == "on" ]]; then
+    # Checks if acpi is available and sets 'acpi' to the output
+    acpi="$(acpi 2> /dev/null)"
+    # if acpi is not empty
+    if [[ -n $acpi ]]; then
+      # Gets the value of acpi that says 'charging' or 'discharging'
+      batt_status=$(echo $acpi | awk '{ print $3 }')
+      # Gets the percentage of the charge
+      battery=$(echo $acpi | awk '{ print $4 }' | sed "s/%,//g")
+      # Gets the right color nbr (low charge = high number)
+      color_nbr=$(( 9 - $battery / 10 ))
+      if [[ $color_nbr < 0 ]]; then
+        color_nbr=0
+      elif [[ $color_nbr > 8 ]]; then
+        color_nbr=8
+      fi
+      # Changes the color code so that it is not bold
+      color_non_bold=$(echo ${colors[$color_nbr]} | sed s/./0/3)
+      printf "\x01${color_non_bold}\x02 [ $batt_status $battery%% ]"
+    fi
+  fi
+  printf "\x01$reset\x02"
+}
+# 1}}}
+# git functions {{{1
+
+function get_git_branch() {
+  # On branches, this will return the branch name
+  # On non-branches, (no branch)
+  ref="$(git symbolic-ref HEAD 2> /dev/null | sed -e 's/refs\/heads\///')"
+  if [[ "$ref" != "" ]]; then
+    printf "%s" "$ref"
+  else
+    printf "%s" "(no branch)"
+  fi
+}
+
+function is_branch1_behind_branch2 () {
+  # Find the first log (if any) that is in branch1 but not branch2
+  first_log="$(git log "$1".."$2" -1 2> /dev/null)"
+
+  # Exit with 0 if there is a first log, 1 if there is not
+  [[ -n "$first_log" ]]
+}
+
+function branch_exists () {
+  # List remote branches           | # Find our branch and exit with 0 or 1 if found/not found
+  git branch --remote 2> /dev/null | grep --quiet "$1"
+}
+
+function parse_git_ahead () {
+  # Grab the local and remote branch
+  branch="$(get_git_branch)"
+  remote="$(git config --get "branch.${branch}.remote" || printf -n "origin")"
+  remote_branch="$remote/$branch"
+  # If the remote branch is behind the local branch
+  # or it has not been merged into origin (remote branch doesn't exist)
+  if (is_branch1_behind_branch2 "$remote_branch" "$branch" ||
+      ! branch_exists "$remote_branch"); then
+    # Print our character
+    printf 1
+  fi
+}
+
+function parse_git_behind () {
+  # Grab the branch
+  branch="$(get_git_branch)"
+  remote="$(git config --get "branch.${branch}.remote" || printf -n "origin")"
+  remote_branch="$remote/$branch"
+  # If the local branch is behind the remote branch
+  if is_branch1_behind_branch2 "$branch" "$remote_branch"; then
+    # Print our character
+    printf 1
+  fi
+}
+
+function parse_git_dirty() {
+  # If the git status has *any* changes (e.g. dirty), print our character
+  if [[ -n "$(git status --porcelain 2> /dev/null)" ]]; then
+    printf 1
+  fi
+}
+
+function is_on_git() {
+  # Checks if the currect working directory is a git repo
+  git rev-parse 2> /dev/null
+}
+
+function get_git_status() {
+  # Grab the git dirty and git behind
+  dirty_branch="$(parse_git_dirty)"
+  branch_ahead="$(parse_git_ahead)"
+  branch_behind="$(parse_git_behind)"
+
+    # Iterate through all the cases and if it matches, then printf
+    if [[ "$dirty_branch" == 1 && "$branch_ahead" == 1 && "$branch_behind" == 1 ]]; then
+      printf "$dirty_unpushed_unpulled"
+    elif [[ "$branch_ahead" == 1 && "$branch_behind" == 1 ]]; then
+      printf "$unpushed_unpulled"
+    elif [[ "$dirty_branch" == 1 && "$branch_ahead" == 1 ]]; then
+      printf "$dirty_unpushed"
+    elif [[ "$branch_ahead" == 1 ]]; then
+      printf "$unpushed"
+    elif [[ "$dirty_branch" == 1 && "$branch_behind" == 1 ]]; then
+      printf "$dirty_unpulled"
+    elif [[ "$branch_behind" == 1 ]]; then
+      printf "$unpulled"
+    elif [[ "$dirty_branch" == 1 ]]; then
+      printf "$dirty_synced"
+    else # clean
+      printf "$synced"
+  fi
+}
+
+function get_git_info () {
+  # Grab the branch
+  branch="$(get_git_branch)"
+
+  # If there are any branches
+  if [[ "$branch" != "" ]]; then
+    output="$branch"
+    # Echo our output
+    printf "$output"
+  fi
+}
+
+# 1}}}
+# populate color_array {{{1
+
+len_name=${#user}
+# Gets the middle of the name
+middle_of_name=$((len_name/2))
+# When the nbr of characters in the name is even, set the two in the middle
+# as middle
+if [[ $((middle_of_name*2)) == "$len_name" ]]; then
+  middle_of_name2=$((middle_of_name - 1))
+# Otherwise both are the same value
+else
+  middle_of_name2=$middle_of_name
+fi
+# Gets the nbr of colors that are available
+nbr_colors=$((${#colors[@]} - 1))
+# The array color_array consists of as many colors as there are characters
+# in the username. It starts populating it from the middle and goes
+# simultaniously up and down.
+color_array=()
+for (( i=0; i<=middle_of_name; i++ )); do
+  if [[ $(($((i / nbr_colors))%2)) == 0 ]]; then
+    index=$((i % nbr_colors))
+  else
+    index=$((nbr_colors - $((i % nbr_colors))))
+  fi
+  up=$((middle_of_name + i))
+  down=$((middle_of_name2 - i))
+  color_array[${up}]=${colors[$nbr_colors - $index]}
+  if [[ $down -ge 0 ]]; then
+    color_array[${down}]=${colors[$nbr_colors - $index]}
+  fi
+  if [[ $i == "$middle_of_name" ]]; then
+    color_array[$((up + 1))]=${colors[$nbr_colors - $index]}
+    color_array[$((up + 2))]=${colors[$nbr_colors - $index]}
+    color_array[$((up + 3))]=${colors[$nbr_colors - $index]}
+  fi
+done
+
+# 1}}}
+# set PS1 {{{1
+
+# prints the username character by character in different colors
+function print_colored() {
+  for (( i=0; i<${#1}; i++ )); do
+    printf "\x01${color_array[$i]}\x02${1:$i:1} "
+  done
+}
+
+NEWLINE=$'\n'
+
+PS1="\[$reset\]\$(print_colored $user) \
+\[${color_array[$len_name]}\]\$(get_hostname)\[${color_array[$len_name]}\]in  \
+\$(get_dir_color)\w  \
+\$( is_on_git && \
+printf \"\[${color_array[$len_name]}\]on  \" && \
+printf \"\$(get_branch_color)\$(get_git_info)\" && \
+printf \"\[${color_array[$len_name]}\] \$(get_git_status)\" && \
+printf \"\[${color_array[$len_name]}\] \")\$(get_battery_stat)$NEWLINE\$(set_symbol) \$(get_text_color)"
+# 1}}}
+# user functions (print_colorscheme/help) {{{1
+
+# prints the available colors in the chosen colorscheme with their values
+function print_colorscheme() {
+  for (( i=0; i<${#colors[@]}; i++ )); do
+    printf "%s" "${colors[$i]}color: $i $NEWLINE"
+  done
+}
+
+# general information about the settings
+function pretty_bash_prompt() {
+  printf "%s" "Pretty Bash Prompt by cmicheledelaney
+https://github.com/cmicheledelaney
+
+To set a different colorscheme set the value of COLOR_SCHEME_PROMPT to 'red', 'blue', 'yellow', or nothing if you want the default colorscheme.
+
+      export COLOR_SCHEME_BASH_PROMPT='blue'
+
+If you want to change he color of the directory, set DIR_COLOR to the desired value between 0 and 8 (run print_colorscheme to see the available colors).
+
+      export DIR_COLOR=8
+
+To set the color of the branch just set BRANCH_COLOR accordingly.
+
+      export BRANCH_COLOR=8
+
+To display the battery status set the BATTERY_STATUS variable to 'on' (only works when acpi is installed).
+
+      export BATTERY_STATUS='on'
+
+The hostname will get displayed if the variable PRETTY_PROMPT_HOSTNAME is set to 'on'.
+
+      export PRETTY_BASH_HOSTNAME='on'
+
+The color of the hostname can be changed through changing the PRETTY_BASH_HOSTNAME_COLOR variable.
+
+      export PRETTY_PROMPT_HOSTNAME_COLOR=3
+
+To change the prompt symbol:
+
+      export PRETTY_PROMPT_SYMBOL='>>>'$NEWLINE
+"
+}
+# 1}}}

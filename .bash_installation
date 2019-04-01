@@ -1,42 +1,112 @@
-#
-# ~/.bash_installation
-#
+#!/usr/bin/env bash
 
 
 # get machine (Linux/Mac/Windows/other) {{{1
 uname_output="$(uname -s)"
 case "${uname_output}" in
-	Linux*)			machine="Linux";;
-	Darwin*)		machine="Mac";;
-	CYGWIN*|MINGW*)	machine="Windows";;
-	*)				machine="UNKNOWN:${uname_output}"
+  Linux*)     machine="Linux";;
+  Darwin*)    machine="Mac";;
+  CYGWIN*|MINGW*) machine="Windows";;
+  *)        machine="UNKNOWN:${uname_output}"
 esac
 # }}}
 # configurations for Linux {{{1
 if [[ "${machine}" == "Linux" ]]; then
-  echo "hmm have to think avout what to install"
-# }}}
+  case "${version}" in
+    *ARCH*) version="Arch";;
+  esac
+  # configurations for Arch {{{2
+  if [[ "$version" == "Arch" ]]; then
+    #pacman -S alsa-tools
+    #pacman -S alsa-utils
+    if ! command -v flake8; then
+      pacman -S flake8
+    fi
+    if ! command -v valgrind; then
+      pacman -S valgrind
+    fi
+    if ! command -v acpi; then
+      pacman -S acpi
+    fi
+    if ! command -v virtualbox; then
+      pacman -S virtualbox
+      pacman -S virtualbox-host-modules-arch
+    fi
+    if ! command -v vlc; then
+      pacman -S vlc
+    fi
+    if ! command -v firefox; then
+      pacman -S firefox
+    fi
+    if ! command -v evince; then
+      pacman -S evince
+    fi
+    if ! command -v gcc; then
+      pacman -S gcc
+    fi
+    if ! command -v make; then
+      pacman -S make
+    fi
+    if ! command -v gdb; then
+      pacman -S gdb
+    fi
+    if ! command -v git; then
+      pacman -S git
+    fi
+    if ! command -v libreoffice; then
+      pacman -S libreoffice
+    fi
+    if ! command -v man; then
+      pacman -S man
+    fi
+    if ! command -v netctl; then
+      pacman -S netctl
+    fi
+    if ! command -v openssh; then
+      pacman -S openssh
+    fi
+    if ! command -v openvpn; then
+      pacman -S openvpn
+    fi
+    if ! command -v python3; then
+      pacman -S python3
+    fi
+    if ! command -v python-pip; then
+      pacman -S python-pip
+    fi
+    if ! command -v scrot; then
+      pacman -S scrot
+    fi
+    if ! command -v shellcheck; then
+      pacman -S shellcheck
+    fi
+    if ! command -v vim; then
+      pacman -S vim
+    fi
+  # 2}}}
+  fi
+# 1}}}
 # configurations for Mac {{{1
 elif [[ "${machine}" == "Mac" ]]; then
   if ! command -v brew; then
-	mkdir $HOME/.brew && curl -fsSL https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C $HOME/.brew
-	mkdir -p /tmp/.$(whoami)-brew-locks
-	mkdir -p $HOME/.brew/var/homebrew
-	ln -s /tmp/.$(whoami)-brew-locks $HOME/.brew/var/homebrew/locks
-	export PATH="$HOME/.brew/bin:$PATH"
-	brew update && brew upgrade
+    mkdir $HOME/.brew && curl -fsSL https://github.com/Homebrew/brew/tarball/master | tar xz --strip 1 -C $HOME/.brew
+    mkdir -p /tmp/.$(whoami)-brew-locks
+    mkdir -p $HOME/.brew/var/homebrew
+    ln -s /tmp/.$(whoami)-brew-locks $HOME/.brew/var/homebrew/locks
+    export PATH="$HOME/.brew/bin:$PATH"
+    brew update && brew upgrade
   fi
   if ! command -v gls; then
-	brew install coreutils
+    brew install coreutils
   fi
   if ! command -v python3; then
-	brew install python3
+    brew install python3
   fi
   if ! command -v valgrind; then
-	brew install valgrind
+    brew install valgrind
   fi
   if ! command -v shellcheck; then
-	brew install shellcheck
+    brew install shellcheck
   fi
 fi
 # }}}
@@ -62,13 +132,13 @@ fi
 # checks if rainbowcat exists, clones it if necessary and moves the binary into the path
 if [[ ! -f ~/bin/rainbowcat ]]; then
   if [[ ! -d ~/rainbowcat ]]; then
-	if git clone https://github.com/cmicheledelaney/rainbowcat; then
-	  make -C ~/rainbowcat
-	  mv ~/rainbowcat/rainbowcat ~/bin
-	  rm -rf rainbowcat
-	fi
+  if git clone https://github.com/cmicheledelaney/rainbowcat; then
+    make -C ~/rainbowcat
+    mv ~/rainbowcat/rainbowcat ~/bin
+    rm -rf rainbowcat
+  fi
   else
-	  echo "rainbowcat directory already exists"
+    echo "rainbowcat directory already exists"
   fi
 fi
 # }}}
