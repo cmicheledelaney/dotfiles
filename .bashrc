@@ -54,14 +54,14 @@ if [[ "${machine}" == "Linux" ]]; then
 # 1}}}
 # configurations for Mac {{{1
 elif [[ "${machine}" == "Mac" ]]; then
-  # settings for ls {{{2
-  eval $(gdircolors -b $HOME/.LS_COLORS)
-  # 2}}}
   # brew settings {{{2
   # make homebrew brew-locks directory
   mkdir -p /tmp/."$(whoami)"-brew-locks
   # add the brew-path to the PATH
   export PATH="$HOME/.brew/bin:$PATH"
+  # 2}}}
+  # settings for ls {{{2
+  eval $(gdircolors -b $HOME/.LS_COLORS)
   # 2}}}
   # ALIASES {{{2
   alias vsc='/Applications/Visual\ Studio\ Code.app/Contents/MacOS/Electron'
