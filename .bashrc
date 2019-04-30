@@ -31,6 +31,7 @@ export MAIL='cmicheledelaney@gmail.com'
 export USER='michele'
 # 2}}}
 # ALIASES {{{2
+alias gitl='git log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr)%C(bold blue)<%an>%Creset' --abbrev-commit'
 alias gitc='git commit -m "$(curl http://whatthecommit.com/index.txt)"'
 alias gcc='gcc -Wall -Wextra -Werror'
 alias filechecker='sh ~/42FileChecker/42FileChecker.sh'
